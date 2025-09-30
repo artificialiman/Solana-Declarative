@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolD - Secure Token Launch Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .editor-panel, .output-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .panel-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-header .icon {
+            font-size: 1.5rem;
+        }
+        
+        .network-selector {
+            margin-bottom: 20px;
+        }
+        
+        .network-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .code-editor {
+            width: 100%;
+            height: 400px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .code-editor:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #e9ecef;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .output {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 300px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #28a745;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        
+        .info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .status-bar {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-item {
+            text-align: center;
+        }
+        
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .status-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .example-templates {
+            margin-top: 20px;
+        }
+        
+        .template-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .template-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fraud-score {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .fraud-low { background: #d4edda; color: #155724; }
+        .fraud-medium { background: #fff3cd; color: #856404; }
+        .fraud-high { background: #f8d7da; color: #721c24; }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SolD</h1>
+            <p>Secure Token Launch Platform - HTML for Blockchain</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="icon">⚡</span>
+                    SolD Code Editor
+                </div>
+                
+                <div class="network-selector">
+                    <select id="networkSelect">
+                        <option value="DEVNET">DEVNET (Testing)</option>
+                        <option value="TESTNET">TESTNET (Staging)</option>
+                        <option value="MAINNET">MAINNET (Production)</option>
+                    </select>
+                </div>
+                
+                <textarea id="codeEditor" class="code-editor" placeholder="Enter your SolD code here...">DEVNET
+
+<token name="MyToken" symbol="MTK" supply="1000000" />
+<timelock duration="100d" wallets=["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"] />
+<insurance wallets=["Bx7k2J8vQp3R5nM1Ks6Hf9Ld4Cv8Bn2Xr7Yq1Zw89Qm"] limit="5" />
+<transfer sol="100000" />
+<fees recipient="GR8TuDpbnDvuLzW4JBCLjbeLvGFs1p21XBytLx6rA7XD" launch="0.02" /></textarea>
+                
+                <div class="actions">
+                    <button id="validateBtn" class="btn btn-secondary">Validate</button>
+                    <button id="launchBtn" class="btn btn-primary">Launch Token</button>
+                </div>
+                
+                <div class="example-templates">
+                    <h4>Example Templates:</h4>
+                    <button class="template-btn" onclick="loadTemplate('basic')">Basic Token Launch</button>
+                    <button class="template-btn" onclick="loadTemplate('defi')">DeFi Project</button>
+                    <button class="template-btn" onclick="loadTemplate('dao')">DAO Token</button>
+                </div>
+            </div>
+            
+            <div class="output-panel">
+                <div class="panel-header">
+                    <span class="icon">📊</span>
+                    Launch Results
+                </div>
+                
+                <div id="output" class="output">
+Ready to process your SolD token launch...
+
+Features:
+✅ Minimum 100-day timelock for safety
+✅ AI-powered fraud detection  
+✅ Automated fee collection
+✅ Insurance wallet protection
+✅ Logo NFT support
+✅ USDC transfers
+
+Click "Validate" to check your code or "Launch Token" to deploy.
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-value" id="totalLaunches">0</div>
+                <div class="status-label">Total Launches</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value" id="successRate">100%</div>
+                <div class="status-label">Success Rate</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value" id="avgFraudScore">0.15</div>
+                <div class="status-label">Avg Fraud Score</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value" id="feesCollected">0.00</div>
+                <div class="status-label">Fees Collected (SOL)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'http://localhost:3000';
+        
+        // DOM Elements
+        const codeEditor = document.getElementById('codeEditor');
+        const networkSelect = document.getElementById('networkSelect');
+        const validateBtn = document.getElementById('validateBtn');
+        const launchBtn = document.getElementById('launchBtn');
+        const output = document.getElementById('output');
+        
+        // State
+        let isProcessing = false;
+        let validationResult = null;
+        
+        // Event Listeners
+        validateBtn.addEventListener('click', validateCode);
+        launchBtn.addEventListener('click', launchToken);
+        networkSelect.addEventListener('change', updateNetwork);
+        
+        // Update network in code when selector changes
+        function updateNetwork() {
+            const network = networkSelect.value;
+            const code = codeEditor.value;
+            const lines = code.split('\n');
+            lines[0] = network;
+            codeEditor.value = lines.join('\n');
+        }
+        
+        // Validate SolD code
+        async function validateCode() {
+            if (isProcessing) return;
+            
+            setProcessing(true);
+            setOutput('Validating SolD code...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/validate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ soldCode: codeEditor.value })
+                });
+                
+                const result = await response.json();
+                
+                if (result.valid) {
+                    validationResult = result;
+                    setOutput(`✅ Validation Successful!
+
+Token: ${result.config.token.name} (${result.config.token.symbol})
+Supply: ${result.config.token.supply}
+Network: ${result.config.network}
+Estimated Fee: ${result.estimatedFee} SOL
+
+Timelock: ${result.config.timelock.duration}
+Insurance Wallets: ${result.config.insurance?.wallets?.length || 0}
+${result.warnings.length > 0 ? '\n⚠️ Warnings:\n' + result.warnings.join('\n') : ''}
+
+Ready for launch!`, 'success');
+                } else {
+                    setOutput(`❌ Validation Failed
+
+Error: ${result.error}
+${result.line ? `Line: ${result.line}` : ''}
+
+Please fix the errors and try again.`, 'error');
+                }
+                
+            } catch (error) {
+                setOutput(`❌ Validation Error
+
+Failed to validate code: ${error.message}
+
+Please check your network connection and try again.`, 'error');
+            }
+            
+            setProcessing(false);
+        }
+        
+        // Launch token
+        async function launchToken() {
+            if (isProcessing) return;
+            
+            if (!validationResult) {
+                setOutput('⚠️ Please validate your code first before launching.', 'warning');
+                return;
+            }
+            
+            setProcessing(true);
+            setOutput('🚀 Launching token...\n\nStep 1: Parsing SolD code...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/launch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        soldCode: codeEditor.value,
+                        network: networkSelect.value 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayLaunchSuccess(result);
+                    updateStats(result);
+                } else {
+                    displayLaunchFailure(result);
+                }
+                
+            } catch (error) {
+                setOutput(`❌ Launch Error
+
+Failed to launch token: ${error.message}
+
+Please check your network connection and try again.`, 'error');
+            }
+            
+            setProcessing(false);
+        }
+        
+        function displayLaunchSuccess(result) {
+            const fraudClass = result.data.fraudAnalysis.fraud_score > 0.6 ? 'fraud-high' : 
+                              result.data.fraudAnalysis.fraud_score > 0.3 ? 'fraud-medium' : 'fraud-low';
+            
+            setOutput(`🎉 Token Launch Successful!
+
+Token: ${result.data.config.token.name} (${result.data.config.token.symbol})
+Program ID: ${result.data.programId}
+Launch PDA: ${result.data.launchPDA}
+Transaction: ${result.data.txSignature}
+
+Processing Steps:
+✅ Parsing: ${result.steps.parsing.timeMs}ms
+✅ Fraud Check: ${result.steps.fraudCheck.timeMs}ms (Score: ${result.steps.fraudCheck.score.toFixed(3)})
+✅ Compilation: ${result.steps.compilation.timeMs}ms  
+✅ Deployment: ${result.steps.deployment.timeMs}ms
+
+Total Processing Time: ${result.processingTimeMs}ms
+Fee Collected: ${result.data.estimatedFee} SOL
+
+Fraud Analysis:
+Risk Level: ${result.data.fraudAnalysis.risk_level}
+Risk Factors: ${result.data.fraudAnalysis.risk_factors.join(', ') || 'None'}
+Recommendations: ${result.data.fraudAnalysis.recommendations.join(', ')}
+
+Your token is now live on ${result.data.config.network}!`, 'success');
+        }
+        
+        function displayLaunchFailure(result) {
+            setOutput(`❌ Token Launch Failed
+
+Errors: ${result.errors.join('\n')}
+
+Processing Steps:
+${result.steps.parsing.success ? '✅' : '❌'} Parsing: ${result.steps.parsing.timeMs}ms
+${result.steps.fraudCheck.success ? '✅' : '❌'} Fraud Check: ${result.steps.fraudCheck.timeMs}ms
+${result.steps.compilation.success ? '✅' : '❌'} Compilation: ${result.steps.compilation.timeMs}ms
+${result.steps.deployment.success ? '✅' : '❌'} Deployment: ${result.steps.deployment.timeMs}ms
+
+${result.steps.fraudCheck.score > 0.8 ? '🚨 High fraud risk detected - launch rejected for safety' : ''}
+
+Please fix the issues and try again.`, 'error');
+        }
+        
+        function updateStats(result) {
+            // Mock stats update - in real app, fetch from API
+            document.getElementById('totalLaunches').textContent = '1';
+            document.getElementById('avgFraudScore').textContent = result.data.fraudAnalysis.fraud_score.toFixed(2);
+            document.getElementById('feesCollected').textContent = result.data.estimatedFee.toFixed(3);
+        }
+        
+        function setOutput(text, type = 'info') {
+            output.textContent = text;
+            output.className = `output ${type}`;
+        }
+        
+        function setProcessing(processing) {
+            isProcessing = processing;
+            validateBtn.disabled = processing;
+            launchBtn.disabled = processing;
+            
+            if (processing) {
+                validateBtn.innerHTML = '<span class="loading"></span>Validating...';
+                launchBtn.innerHTML = '<span class="loading"></span>Launching...';
+            } else {
+                validateBtn.innerHTML = 'Validate';
+                launchBtn.innerHTML = 'Launch Token';
+            }
+        }
+        
+        // Template loading
+        const templates = {
+            basic: `DEVNET
+
+<token name="BasicToken" symbol="BASIC" supply="1000000" />
+<timelock duration="100d" />
+<fees recipient="GR8TuDpbnDvuLzW4JBCLjbeLvGFs1p21XBytLx6rA7XD" launch="0.01" />`,
+            
+            defi: `DEVNET
+
+<token name="YieldToken" symbol="YIELD" supply="10000000" />
+<logo nft="FvshM7f3mUo5oErznADVxMEqC58PdK6aYVD9kSz2cHg7" />
+<timelock duration="180d" wallets=["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM", "Bx7k2J8vQp3R5nM1Ks6Hf9Ld4Cv8Bn2Xr7Yq1Zw89Qm"] />
+<insurance wallets=["FvshM7f3mUo5oErznADVxMEqC58PdK6aYVD9kSz2cHg7"] limit="3" />
+<transfer sol="500000" usdc="100000" />
+<relock duration="365d" escrow="GR8TuDpbnDvuLzW4JBCLjbeLvGFs1p21XBytLx6rA7XD" />
+<fees recipient="GR8TuDpbnDvuLzW4JBCLjbeLvGFs1p21XBytLx6rA7XD" launch="0.035" />`,
+            
+            dao: `DEVNET
+
+<token name="DAOToken" symbol="DAO" supply="100000000" />
+<logo nft="9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM" />
+<timelock duration="365d" wallets=["treasury:DAOTreasury", "multisig:CoreTeam", "dev:DevFund"] />
+<insurance wallets=["emergency:EmergencyFund", "community:CommunityFund"] limit="10" />
+<transfer sol="1000000" usdc="500000" />
+<relock duration="730d" escrow="GR8TuDpbnDvuLzW4JBCLjbeLvGFs1p21XBytLx6rA7XD" />
+<fees recipient="GR8TuDpbnDvuLzW4JBCLjbeLvGFs1p21XBytLx6rA7XD" launch="0.055" />`
+        };
+        
+        function loadTemplate(templateName) {
+            if (templates[templateName]) {
+                codeEditor.value = templates[templateName];
+                validationResult = null;
+                setOutput('Template loaded. Click "Validate" to check the code.', 'info');
+            }
+        }
+        
+        // Initialize
+        updateNetwork();
+    </script>
+</body>
+</html>
